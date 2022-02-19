@@ -32,6 +32,14 @@ var delta = 0;
 var keyIsDown = false;
 
 
+/*
+ * The length of a dot is 1 time unit.
+ * A dash is 3 time units.
+ * The space between symbols (dots and dashes) of the same letter is 1 time unit.
+ * The space between letters is 3 time units.
+ * The space between words is 7 time units.
+ */
+
 function translate(st) {
 	var letter = "";
 	switch(st) {
@@ -131,18 +139,20 @@ function translate(st) {
 	process.stdout.write(letter);
 }
 
-function isSpaceAndDecode() {
+function detectCharacterEnd() {
 	const timeSinceKeyUp = Date.now() - keyUpT;
 	if (! keyIsDown) {
 		if (buffer.length > 0) {
 			if (timeSinceKeyUp > 1.5*shortest) {
+				// end of character
 				newLetter = true;
 				const st = buffer.join(' ');
 				translate(st);
 				buffer = [];
 			}
 		}
-		if (! inactive && (timeSinceKeyUp > 1.4*longest)) {
+		if (! inactive && (timeSinceKeyUp > 6*shortest)) {
+			// end of word
 			inactive = true;
 			process.stdout.write(" ");
 		}
@@ -151,7 +161,7 @@ function isSpaceAndDecode() {
 
 function shortPress(t) {
 	const dFromShortest = Math.abs(t - shortest);
-	const dFromLongest = Math.abs(t - longest);
+	const dFromLongest = Math.abs(t - 3*shortest);
 	return (dFromShortest < dFromLongest);
 }
 
@@ -163,6 +173,8 @@ function killTone() {
 }
 
 function makeTone() {
+	// change this to match available tone generation utility on your
+	// system
 	pid = spawn("padsp", [ "tones", "1000", "600" ], {detached: true});
 }
 
@@ -186,11 +198,12 @@ function keyEvent(data) {
 			buffer.push('dah');
 			longest = (3*longest + delta)/4;
 		}
+		shortest = longest/3;
 	}
 }
 
 
 joystick.on('button', keyEvent);
 
-setInterval(isSpaceAndDecode, shortest/3);
+setInterval(detectCharacterEnd, shortest/3);
 
