@@ -65,8 +65,8 @@ Hopefully it will be useful in improving your timing.
 Installation
 ------------
 
-1. Check you can generate a tona using the "tones" utility on your PC using the
-   following from the command line:
+1. Check you can generate an audible tone using the "tones" utility on your PC
+   using the following from the command line:
 ```
 padsp tones 1000 600
 ```
@@ -114,13 +114,17 @@ Missing).
 TO DO
 
 
+Jon Kelly
+VK2JHK
+
+
 License
 ---------
 
 ```
 ISC License
 
-Copyright 2021 Jonathan Kelly jonathan.p.h.kelly@gmail.com
+Copyright 2021 Jonathan Kelly jonathan.p.h.kelly @ gmail.com
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
