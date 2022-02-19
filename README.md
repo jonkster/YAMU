@@ -9,23 +9,14 @@ Overview
 
 This application detects a USB connected joystick button press and generates a
 tone, allowing a morse key interface to a PC (eg as a morse practice
-oscilator).  It also attempts to map the generated button pressea, representing
-morse key clicks, into characters.
+oscilator).  It also attempts to map the generated button presses,
+(representing morse key clicks), into characters.
 
 It assumes a morse key is interfaced to the computer in a way that simulates a
-Joystck.  An example of how a morse key can be interfaced in such a way is
+Joystick.  An example of how a morse key can be interfaced in such a way is
 described below.
 
 It is very rudimentary.  Feel free to take and adapt to your own purposes.
-
-Intended Use
-------------
-It is desgined to be used as a practice/training tool for Morse.
-
-Assuming you have interfaced the key to both the PC and your transmitter, it
-can also display on screen the characters you are keying when operating a
-transmitter (NB it does not decode reception, only what you send).
-
 
 What it Does
 -------------
@@ -33,6 +24,16 @@ What it Does
 When a key/button press is detected by the program it generates a tone (same as
 a practice oscillator).  It also attempts to decipher the presses into
 characters and will display them on the screen (ie it is a code reader).
+
+
+Intended Use
+------------
+It is designed to be used as a practice/training tool for Morse.
+
+In addition it could also be used when operating a transmitter, (assuming you
+have interfaced the key to both your PC and your transmitter). It can then
+display on screen the characters you are keying (NB it does not decode
+reception, only what you send).
 
 
 Environment
@@ -44,6 +45,22 @@ It calls a tone generation utility "tones" from the "siggen" package.
 
 This will need to be installed (if you can use another tone generation
 utility, you will need to modify the code to use it).
+
+Code translation
+-----------------
+
+Do not expect miracles!  
+
+The code translation from key presses to characters is pretty simple.
+
+It is not perfect, it cannot match a human who can filter out quite noticeable
+variations from 'perfect' timing.  The closer the keying is to properly timed
+Morse, the better it will be.
+
+It should gradually adapt to the speed and spacing you are using so may improve
+in accuracy as you send.
+
+Hopefully it will be useful in improving your timing.
 
 Installation
 ------------
