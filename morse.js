@@ -19,6 +19,7 @@
 
 var joystick = new (require('./node_modules/joystick'))(0, 3500, 350);
 var spawn = require("child_process").spawn;
+const { exec } = require("child_process");
 
 var pid = 0;
 var longest = 220;
@@ -30,6 +31,10 @@ var buffer = [];
 var inactive = false;
 var delta = 0;
 var keyIsDown = false;
+
+var charStart = 0;
+var charCount = 0;
+var wpm = 0;
 
 
 /*
@@ -115,28 +120,37 @@ function translate(st) {
 			break;
 		case "dah dah dah dah dah": letter = "0";
 			break;
-		case "di dah di dah di": letter = "_AR_";
+		case "di dah di dah di": letter = "A̅R̅";
 			break;
-		case "di dah di di di": letter = "_AS_";
+		case "di dah di di di": letter = "A̅S̅";
 			break;
-		case "dah di di di dah": letter = "_BT_";
+		case "dah di di di dah": letter = "B̅T̅";
 			break;
-		case "di di di dah di dah": letter = "_SK_";
+		case "di di di dah di dah": letter = "S̅K̅";
 			break;
-		case "dah di di di dah di dah": letter = "_BK_";
+		case "dah di di di dah di dah": letter = "B̅K̅";
 			break;
-		case "di dah di dah": letter = "_AA_\n";
+		case "di dah di dah":
+			// use newline as place to display WPM
+			letter = "(wpm:" + wpm + ")\n";
 			break;
 		case "di dah di dah di dah": letter = ".";
 			break;
 		case "di di dah dah di di": letter = "?"
 			break;
-		case "di di di di di di di di": letter = "_CORRECTION_"
+		case "di di di di di di di di": letter = "C̅O̅R̅R̅E̅C̅T̅I̅O̅N̅"
 			break;
 		default:
 			letter = '_';
 	}
 	process.stdout.write(letter);
+}
+
+function estimateWPM() {
+	const secs = (Date.now() - charStart) / 1000;
+	// nb assume actual char count includes a space, so add 1
+	const cpm = 60 * (charCount+1) / secs;
+	wpm = Math.floor(cpm / 5);
 }
 
 function detectCharacterEnd() {
@@ -149,12 +163,16 @@ function detectCharacterEnd() {
 				const st = buffer.join(' ');
 				translate(st);
 				buffer = [];
+				charCount++;
 			}
 		}
-		if (! inactive && (timeSinceKeyUp > 6*shortest)) {
+		if (! inactive && (timeSinceKeyUp > 5*shortest)) {
 			// end of word
 			inactive = true;
 			process.stdout.write(" ");
+			estimateWPM();
+			charCount = 0;
+			charStart = 0;
 		}
 	}
 }
@@ -167,23 +185,41 @@ function shortPress(t) {
 
 function killTone() {
 	if (pid !== 0) {
-		process.kill(pid.pid)
+		try {
+			process.kill(pid.pid);
+		} catch(e) {
+			// ?
+		}
 		pid = 0;
 	}
 }
 
-function makeTone() {
+function makeTone(freq) {
+	// change this to match available tone generation utility on your
+	// system.  Return as a separate process pid so tone can be stopped on
+	// keyup by using kill signal
+	return spawn("padsp", [ "signalgen",  "-t",  2,  freq], {detached: true});
+	//return spawn("padsp", [ "tones", 2000, freq ], {detached: true});
+}
+
+function makeClick() {
 	// change this to match available tone generation utility on your
 	// system
-	pid = spawn("padsp", [ "tones", "1000", "600" ], {detached: true});
+	//const cmd = "padsp tones 50 2000";
+	const cmd = "padsp signalgen -t 10m -v square 2000"
+	return exec(cmd);
 }
+
 
 function keyEvent(data) {
 	if (data.value > 0) {
 		keyIsDown = true;
 		keyDnT = Date.now();
-		makeTone();
+		pid = makeTone(600);
 		inactive = false;
+		if (charStart == 0) {
+			charStart = Date.now();
+		}
 	} else if (data.value === 0) {
 		keyIsDown = false;
 		keyUpT = Date.now();
